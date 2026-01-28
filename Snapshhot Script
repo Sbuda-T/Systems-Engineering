@@ -1,0 +1,46 @@
+# Configuration
+$date = Get-Date -Format "dd-MMM-yyyy_HHmm"
+$reportFolder = ".\ProcessReports"
+$reportName = "$reportFolder\running_processes-$date-Report.csv"
+
+# Create folder if it doesn't exist
+if (-not (Test-Path $reportFolder)) {
+    New-Item -ItemType Directory -Path $reportFolder | Out-Null
+}
+
+try {
+    # Get computer info
+    $totalRAM = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 2)
+    
+    # Capture processes
+    $processes = Get-Process | Select-Object `
+        Id, `
+        ProcessName, `
+        Description, `
+        Path, `
+        Company, `
+        @{Name="CPU_Seconds"; Expression={[math]::Round($_.CPU, 2)}}, `
+        @{Name="Memory_MB"; Expression={[math]::Round($_.WorkingSet / 1MB, 2)}}, `
+        @{Name="Memory_Percent"; Expression={[math]::Round(($_.WorkingSet / 1GB) / $totalRAM * 100, 2)}}, `
+        @{Name="Threads"; Expression={$_.Threads.Count}}, `
+        @{Name="Handles"; Expression={$_.Handles}}, `
+        @{Name="StartTime"; Expression={$_.StartTime}}
+    
+    # Sort by memory usage
+    $processes | Sort-Object Memory_MB -Descending | Export-Csv -Path $reportName -NoTypeInformation
+    
+    # Display summary
+    $totalMemoryUsed = [math]::Round(($processes | Measure-Object -Property Memory_MB -Sum).Sum, 2)
+    $topProcess = $processes | Sort-Object Memory_MB -Descending | Select-Object -First 1
+    
+    Write-Host "`n✓ Snapshot saved to $reportName" -ForegroundColor Green
+    Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor DarkGray
+    Write-Host "Total Processes: $($processes.Count)" -ForegroundColor Cyan
+    Write-Host "Total Memory Used: $totalMemoryUsed MB" -ForegroundColor Cyan
+    Write-Host "System RAM: $totalRAM GB" -ForegroundColor Cyan
+    Write-Host "Top Consumer: $($topProcess.ProcessName) ($($topProcess.Memory_MB) MB)" -ForegroundColor Yellow
+    Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`n" -ForegroundColor DarkGray
+    
+} catch {
+    Write-Host "✗ Error creating report: $_" -ForegroundColor Red
+}
