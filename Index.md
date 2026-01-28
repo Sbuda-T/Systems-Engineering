@@ -1,7 +1,3 @@
----
-title: "CDPE"
-layout: default
----
 
 # Constraint-Driven Process Optimisation Engineering (CDPE)
 
