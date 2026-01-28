@@ -1,0 +1,7 @@
+| Data Point                           | Source File                                       | Exact Section                     |
+| ------------------------------------ | ------------------------------------------------- | --------------------------------- |
+| Constraints (< 1.8 GB, < 50% CPU)    | Final-Constraint-Driven-Process-Optimisation...md | Section 1: Constraint Analysis    |
+| Service List (DiagTrack, WSearch...) | DevMode-On-Off-Guide.txt                          | Script: $disableServices array    |
+| Baseline Metrics (2.9 GB used)       | 2.-Precise-Services.msc-Disable-List.txt          | Section 4: Before/After Checklist |
+| Process RAM Impact (Chrome usage)    | running_processes-24-Jan-Report.csv               | Rows 2-20 (Chrome process dump)   |
+| System Architecture                  | CNDF-discription.txt                              | Section 6: Component Breakdown    |
